@@ -484,7 +484,7 @@ bool SDKTools::ProcessCommandTarget(cmd_target_info_t *info)
 			IPlayerInfo *plinfo = player->GetPlayerInfo();
 			if (plinfo == NULL)
 				continue;
-			if (plinfo->GetTeamIndex() == 1 &&
+			if ((plinfo->GetTeamIndex() == 0 || plinfo->GetTeamIndex() == 1) &&
 			    playerhelpers->FilterCommandTarget(pAdmin, player, info->flags) ==
 				COMMAND_TARGET_VALID)
 			{
