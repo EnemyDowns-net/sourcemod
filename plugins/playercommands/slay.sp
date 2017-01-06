@@ -31,12 +31,6 @@
  * Version: $Id$
  */
 
-void PerformSlay(int client, int target)
-{
-	LogAction(client, target, "\"%L\" slayed \"%L\"", client, target);
-	ForcePlayerSuicide(target);
-}
-
 void DisplaySlayMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_Slay);
@@ -105,7 +99,8 @@ public int MenuHandler_Slay(Menu menu, MenuAction action, int param1, int param2
 		{
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
-			PerformSlay(param1, target);
+			ForcePlayerSuicide(target);
+			LogAction(param1, target, "\"%L\" slayed \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Slayed target", "_s", name);
 		}
 		
@@ -144,16 +139,18 @@ public Action Command_Slay(int client, int args)
 
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformSlay(client, target_list[i]);
+		ForcePlayerSuicide(target_list[i]);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Slayed target", target_name);
+		LogAction(client, -1, "\"%L\" slayed \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Slayed target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" slayed \"%L\"", client, target_list[0]);
 	}
 
 	return Plugin_Handled;

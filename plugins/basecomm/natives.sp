@@ -85,7 +85,7 @@ public int Native_SetClientGag(Handle hPlugin, int numParams)
 			return false;
 		}
 		
-		PerformGag(-1, client, true);
+		PerformGag(client);
 	}
 	else
 	{
@@ -94,7 +94,7 @@ public int Native_SetClientGag(Handle hPlugin, int numParams)
 			return false;
 		}
 		
-		PerformUnGag(-1, client, true);
+		PerformUnGag(client);
 	}
 	
 	return true;
@@ -122,7 +122,7 @@ public int Native_SetClientMute(Handle hPlugin, int numParams)
 			return false;
 		}
 		
-		PerformMute(-1, client, true);
+		PerformMute(client);
 	}
 	else
 	{
@@ -131,7 +131,7 @@ public int Native_SetClientMute(Handle hPlugin, int numParams)
 			return false;
 		}
 		
-		PerformUnMute(-1, client, true);
+		PerformUnMute(client);
 	}
 	
 	return true;

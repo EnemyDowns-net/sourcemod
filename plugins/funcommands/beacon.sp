@@ -59,18 +59,12 @@ void KillAllBeacons()
 	}
 }
 
-void PerformBeacon(int client, int target)
+void PerformBeacon(int target)
 {
 	if (g_BeaconSerial[target] == 0)
-	{
 		CreateBeacon(target);
-		LogAction(client, target, "\"%L\" set a beacon on \"%L\"", client, target);
-	}
 	else
-	{
 		KillBeacon(target);
-		LogAction(client, target, "\"%L\" removed a beacon on \"%L\"", client, target);
-	}
 }
 
 public Action Timer_Beacon(Handle timer, any value)
@@ -184,8 +178,9 @@ public int MenuHandler_Beacon(Menu menu, MenuAction action, int param1, int para
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformBeacon(param1, target);
+			PerformBeacon(target);
 			ShowActivity2(param1, "[SM] ", "%t", "Toggled beacon on target", "_s", name);
+			LogAction(param1, target, "\"%L\" toggled beacon on \"%L\"", param1, target);
 		}
 		
 		/* Re-draw the menu if they're still valid */
@@ -227,16 +222,18 @@ public Action Command_Beacon(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformBeacon(client, target_list[i]);
+		PerformBeacon(target_list[i]);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled beacon on target", target_name);
+		LogAction(client, -1, "\"%L\" toggled beacon on \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled beacon on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" toggled beacon on \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;

@@ -68,13 +68,11 @@ void PerformTimeBomb(int client, int target)
 	if (g_TimeBombSerial[target] == 0)
 	{
 		CreateTimeBomb(target);
-		LogAction(client, target, "\"%L\" set a TimeBomb on \"%L\"", client, target);
 	}
 	else
 	{
 		KillTimeBomb(target);
 		SetEntityRenderColor(client, 255, 255, 255, 255);
-		LogAction(client, target, "\"%L\" removed a TimeBomb on \"%L\"", client, target);
 	}
 }
 
@@ -279,6 +277,7 @@ public int MenuHandler_TimeBomb(Menu menu, MenuAction action, int param1, int pa
 			GetClientName(target, name, sizeof(name));
 			
 			PerformTimeBomb(param1, target);
+			LogAction(param1, target, "\"%L\" toggled TimeBomb on \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Toggled TimeBomb on target", "_s", name);
 		}
 		
@@ -327,10 +326,12 @@ public Action Command_TimeBomb(int client, int args)
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled TimeBomb on target", target_name);
+		LogAction(client, -1, "\"%L\" toggled TimeBomb on \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled TimeBomb on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" toggled TimeBomb on \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;

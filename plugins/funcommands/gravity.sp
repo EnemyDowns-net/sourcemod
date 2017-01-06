@@ -33,12 +33,6 @@
 
 int g_GravityTarget[MAXPLAYERS+1];
 
-void PerformGravity(int client, int target, float amount)
-{
-	SetEntityGravity(target, amount);
-	LogAction(client, target, "\"%L\" set gravity on \"%L\" (amount \"%f\")", client, target, amount);
-}
-
 public void AdminMenu_Gravity(TopMenu topmenu, 
 					  TopMenuAction action,
 					  TopMenuObject object_id,
@@ -169,7 +163,8 @@ public int MenuHandler_GravityAmount(Menu menu, MenuAction action, int param1, i
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformGravity(param1, target, amount);
+			SetEntityGravity(target, amount);
+			LogAction(param1, target, "\"%L\" set gravity on \"%L\" to %f.", param1, target, amount);
 			ShowActivity2(param1, "[SM] ", "%t", "Set gravity on target", "_s", name, amount);
 		}
 		
@@ -229,16 +224,18 @@ public Action Command_Gravity(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformGravity(client, target_list[i], amount);
+		SetEntityGravity(target_list[i], amount);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Set gravity on target", target_name);
+		LogAction(client, -1, "\"%L\" set gravity on \"%s\" to %f.", client, target_name, amount);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Set gravity on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" set gravity on \"%L\" to %f.", client, target_list[0], amount);
 	}
 	
 	return Plugin_Handled;

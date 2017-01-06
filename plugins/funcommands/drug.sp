@@ -106,7 +106,7 @@ void KillAllDrugs()
 	}
 }
 
-void PerformDrug(int client, int target, int toggle)
+void PerformDrug(int target, int toggle)
 {
 	switch (toggle)
 	{
@@ -115,12 +115,10 @@ void PerformDrug(int client, int target, int toggle)
 			if (g_DrugTimers[target] == null)
 			{
 				CreateDrug(target);
-				LogAction(client, target, "\"%L\" drugged \"%L\"", client, target);
 			}
 			else
 			{
 				KillDrug(target);
-				LogAction(client, target, "\"%L\" undrugged \"%L\"", client, target);
 			}			
 		}
 
@@ -129,7 +127,6 @@ void PerformDrug(int client, int target, int toggle)
 			if (g_DrugTimers[target] == null)
 			{
 				CreateDrug(target);
-				LogAction(client, target, "\"%L\" drugged \"%L\"", client, target);
 			}			
 		}
 		
@@ -138,7 +135,6 @@ void PerformDrug(int client, int target, int toggle)
 			if (g_DrugTimers[target] != null)
 			{
 				KillDrug(target);
-				LogAction(client, target, "\"%L\" undrugged \"%L\"", client, target);
 			}			
 		}
 	}
@@ -268,7 +264,8 @@ public int MenuHandler_Drug(Menu menu, MenuAction action, int param1, int param2
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformDrug(param1, target, 2);
+			PerformDrug(target, 2);
+			LogAction(param1, target, "\"%L\" toggled drugs on \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Toggled drug on target", "_s", name);
 		}
 		
@@ -326,16 +323,18 @@ public Action Command_Drug(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformDrug(client, target_list[i], toggle);
+		PerformDrug(target_list[i], toggle);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled drug on target", target_name);
+		LogAction(client, -1, "\"%L\" toggled drugs on \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled drug on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" toggled drugs on \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;

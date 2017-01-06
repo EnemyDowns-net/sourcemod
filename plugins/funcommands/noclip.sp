@@ -31,7 +31,7 @@
  * Version: $Id$
  */
 
-void PerformNoClip(int client, int target)
+void PerformNoClip(int target)
 {
 	MoveType movetype = GetEntityMoveType(target);
 
@@ -43,8 +43,6 @@ void PerformNoClip(int client, int target)
 	{
 		SetEntityMoveType(target, MOVETYPE_WALK);
 	}
-	
-	LogAction(client, target, "\"%L\" toggled noclip on \"%L\"", client, target);
 }
 
 public void AdminMenu_NoClip(TopMenu topmenu, 
@@ -112,7 +110,8 @@ public int MenuHandler_NoClip(Menu menu, MenuAction action, int param1, int para
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformNoClip(param1, target);
+			PerformNoClip(target);
+			LogAction(param1, target, "\"%L\" toggled noclip on \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Toggled noclip on target", "_s", name);
 		}
 		
@@ -155,16 +154,18 @@ public Action Command_NoClip(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformNoClip(client, target_list[i]);
+		PerformNoClip(target_list[i]);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled noclip on target", target_name);
+		LogAction(client, -1, "\"%L\" toggled noclip on \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled noclip on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" toggled noclip on \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;

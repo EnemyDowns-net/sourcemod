@@ -33,10 +33,8 @@
 
 char g_NewName[MAXPLAYERS+1][MAX_NAME_LENGTH];
 
-void PerformRename(int client, int target)
+void PerformRename(int target)
 {
-	LogAction(client, target, "\"%L\" renamed \"%L\" (to \"%s\")", client, target, g_NewName[target]);
-
 	SetClientName(target, g_NewName[target]);
 
 	g_NewName[target][0] = '\0';
@@ -109,7 +107,8 @@ public int MenuHandler_Rename(Menu menu, MenuAction action, int param1, int para
 
 			RandomizeName(target);
 			ShowActivity2(param1, "[SM] ", "%t", "Renamed target", "_s", name);
-			PerformRename(param1, target);
+			LogAction(param1, target, "\"%L\" renamed \"%L\" to \"%s\")", param1, target, g_NewName[target]);
+			PerformRename(target);
 		}		
 		DisplayRenameTargetMenu(param1);
 	}
@@ -168,12 +167,14 @@ public Action Command_Rename(int client, int args)
 		if (tn_is_ml)
 		{
 			ShowActivity2(client, "[SM] ", "%t", "Renamed target", target_name);
+			LogAction(client, -1, "\"%L\" renamed \"%s\" to \"%s\")", client, target_name, arg2);
 		}
 		else
 		{
 			ShowActivity2(client, "[SM] ", "%t", "Renamed target", "_s", target_name);
+			LogAction(client, target_list[0], "\"%L\" renamed \"%L\" to \"%s\")", client, target_list[0], arg2);
 		}
-
+		
 		for (int i = 0; i < target_count; i++)
 		{
 			if (randomize)
@@ -191,7 +192,7 @@ public Action Command_Rename(int client, int args)
 					Format(g_NewName[target_list[i]], MAX_NAME_LENGTH, "%s", arg2);
 				}
 			}
-			PerformRename(client, target_list[i]);
+			PerformRename(target_list[i]);
 		}
 	}
 	else

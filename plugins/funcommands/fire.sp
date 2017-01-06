@@ -64,24 +64,16 @@ void KillAllFireBombs()
 	}
 }
 
-void PerformBurn(int client, int target, float seconds)
-{
-	IgniteEntity(target, seconds);
-	LogAction(client, target, "\"%L\" ignited \"%L\" (seconds \"%f\")", client, target, seconds);
-}
-
 void PerformFireBomb(int client, int target)
 {
 	if (g_FireBombSerial[client] == 0)
 	{
 		CreateFireBomb(target);
-		LogAction(client, target, "\"%L\" set a FireBomb on \"%L\"", client, target);
 	}
 	else
 	{
 		KillFireBomb(target);
 		SetEntityRenderColor(client, 255, 255, 255, 255);
-		LogAction(client, target, "\"%L\" removed a FireBomb on \"%L\"", client, target);
 	}
 }
 
@@ -306,7 +298,8 @@ public int MenuHandler_Burn(Menu menu, MenuAction action, int param1, int param2
 		{
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
-			PerformBurn(param1, target, 20.0);
+			IgniteEntity(target, 20.0);
+			LogAction(param1, target, "\"%L\" ignited \"%L\" (seconds \"20\")", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Set target on fire", "_s", name);
 		}
 		
@@ -353,6 +346,7 @@ public int MenuHandler_FireBomb(Menu menu, MenuAction action, int param1, int pa
 			GetClientName(target, name, sizeof(name));
 			
 			PerformFireBomb(param1, target);
+			LogAction(param1, target, "\"%L\" toggled FireBomb on \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Toggled FireBomb on target", "_s", name);
 		}
 		
@@ -408,16 +402,18 @@ public Action Command_Burn(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformBurn(client, target_list[i], seconds);
+		IgniteEntity(target_list[i], seconds);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Set target on fire", target_name);
+		LogAction(client, -1, "\"%L\" ignited \"%s\" (seconds \"%f\")", client, target_name, seconds);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Set target on fire", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" ignited \"%L\" (seconds \"%f\")", client, target_list[0], seconds);
 	}
 
 	return Plugin_Handled;
@@ -460,10 +456,12 @@ public Action Command_FireBomb(int client, int args)
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled FireBomb on target", target_name);
+		LogAction(client, -1, "\"%L\" toggled FireBomb on \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled FireBomb on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" toggled FireBomb on \"%L\"", client, target_list[0]);
 	}	
 	return Plugin_Handled;
 }

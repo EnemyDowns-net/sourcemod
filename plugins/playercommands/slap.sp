@@ -33,12 +33,6 @@
  
 int g_SlapDamage[MAXPLAYERS+1];
 
-void PerformSlap(int client, int target, int damage)
-{
-	LogAction(client, target, "\"%L\" slapped \"%L\" (damage \"%d\")", client, target, damage);
-	SlapPlayer(target, damage, true);
-}
-
 void DisplaySlapDamageMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_SlapDamage);
@@ -151,7 +145,8 @@ public int MenuHandler_Slap(Menu menu, MenuAction action, int param1, int param2
 		{
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
-			PerformSlap(param1, target, g_SlapDamage[param1]);
+			SlapPlayer(target, g_SlapDamage[param1]);
+			LogAction(param1, target, "\"%L\" slapped \"%L\" (damage \"%d\")", param1, target, g_SlapDamage[param1]);
 			ShowActivity2(param1, "[SM] ", "%t", "Slapped target", "_s", name);
 		}
 		
@@ -202,16 +197,18 @@ public Action Command_Slap(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformSlap(client, target_list[i], damage);
+		SlapPlayer(target_list[i], damage);
 	}
 
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Slapped target", target_name);
+		LogAction(client, -1, "\"%L\" slapped \"%s\" (damage \"%d\")", client, target_name, damage);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Slapped target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" slapped \"%L\" (damage \"%d\")", client, target_list[0], damage);
 	}
 
 	return Plugin_Handled;

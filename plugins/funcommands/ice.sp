@@ -125,24 +125,12 @@ void KillAllFreezes()
 	}
 }
 
-void PerformFreeze(int client, int target, int time)
-{
-	FreezeClient(target, time);
-	LogAction(client, target, "\"%L\" froze \"%L\"", client, target);
-}
-
-void PerformFreezeBomb(int client, int target)
+void PerformFreezeBomb(int target)
 {
 	if (g_FreezeBombSerial[target] != 0)
-	{
 		KillFreezeBomb(target);
-		LogAction(client, target, "\"%L\" removed a FreezeBomb on \"%L\"", client, target);
-	}
 	else
-	{
 		CreateFreezeBomb(target);
-		LogAction(client, target, "\"%L\" set a FreezeBomb on \"%L\"", client, target);
-	}
 }
 
 public Action Timer_Freeze(Handle timer, any value)
@@ -421,7 +409,8 @@ public int MenuHandler_Freeze(Menu menu, MenuAction action, int param1, int para
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformFreeze(param1, target, g_Cvar_FreezeDuration.IntValue);
+			FreezeClient(target, g_Cvar_FreezeDuration.IntValue);
+			LogAction(param1, target, "\"%L\" froze \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Froze target", "_s", name);
 		}
 		
@@ -467,7 +456,8 @@ public int MenuHandler_FreezeBomb(Menu menu, MenuAction action, int param1, int 
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformFreezeBomb(param1, target);
+			PerformFreezeBomb(target);
+			LogAction(param1, target, "\"%L\" toggled FreezeBomb on \"%L\"", param1, target);
 			ShowActivity2(param1, "[SM] ", "%t", "Toggled FreezeBomb on target", "_s", name);
 		}
 		
@@ -523,16 +513,18 @@ public Action Command_Freeze(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformFreeze(client, target_list[i], seconds);
+		FreezeClient(target_list[i], seconds);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Froze target", target_name);
+		LogAction(client, -1, "\"%L\" froze \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Froze target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" froze \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;
@@ -569,16 +561,18 @@ public Action Command_FreezeBomb(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformFreezeBomb(client, target_list[i]);
+		PerformFreezeBomb(target_list[i]);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled FreezeBomb on target", target_name);
+		LogAction(client, -1, "\"%L\" toggled FreezeBomb on \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Toggled FreezeBomb on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" toggled FreezeBomb on \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;

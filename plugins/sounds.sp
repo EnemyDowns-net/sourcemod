@@ -107,16 +107,17 @@ public Action Command_Play(int client, int args)
 	for (int i = 0; i < target_count; i++)
 	{
 		ClientCommand(target_list[i], "playgamesound \"%s\"", Arguments[len]);
-		LogAction(client, target_list[i], "\"%L\" played sound on \"%L\" (file \"%s\")", client, target_list[i], Arguments[len]);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Played sound to target", target_name);
+		LogAction(client, -1, "\"%L\" played sound on \"%s\" (file \"%s\")", client, target_name, Arguments[len]);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Played sound to target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" played sound on \"%L\" (file \"%s\")", client, target_list[0], Arguments[len]);
 	}
 
 	return Plugin_Handled;

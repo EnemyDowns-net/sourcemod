@@ -31,10 +31,8 @@
  * Version: $Id$
  */
  
-void PerformKick(int client, int target, const char[] reason)
+void PerformKick(int target, const char[] reason)
 {
-	LogAction(client, target, "\"%L\" kicked \"%L\" (reason \"%s\")", client, target, reason);
-
 	if (reason[0] == '\0')
 	{
 		KickClient(target, "%t", "Kicked by admin");
@@ -110,7 +108,8 @@ public int MenuHandler_Kick(Menu menu, MenuAction action, int param1, int param2
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			ShowActivity2(param1, "[SM] ", "%t", "Kicked target", "_s", name);
-			PerformKick(param1, target, "");
+			PerformKick(target, "");
+			LogAction(param1, target, "\"%L\" kicked \"%L\"", param1, target);
 		}
 		
 		/* Re-draw the menu if they're still valid */
@@ -201,13 +200,22 @@ public Action Command_Kick(int client, int args)
 			}
 			else
 			{
-				PerformKick(client, target_list[i], reason);
+				PerformKick(target_list[i], reason);
 			}
 		}
 		
 		if (kick_self)
 		{
-			PerformKick(client, client, reason);
+			PerformKick(client, reason);
+		}
+		
+		if (tn_is_ml)
+		{
+			LogAction(client, -1, "\"%L\" kicked \"%s\" (reason \"%s\")", client, target_name, reason);
+		}
+		else
+		{
+			LogAction(client, target_list[0], "\"%L\" kicked \"%L\" (reason \"%s\")", client, target_list[0], reason);
 		}
 	}
 	else

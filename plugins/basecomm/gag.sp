@@ -186,52 +186,53 @@ public int MenuHandler_GagTypes(Menu menu, MenuAction action, int param1, int pa
 		{
 			case CommType_Mute:
 			{
-				PerformMute(param1, target);
+				PerformMute(target);
+				LogAction(param1, target, "\"%L\" muted \"%L\"", param1, target);
 				ShowActivity2(param1, "[SM] ", "%t", "Muted target", "_s", name);
 			}
 			case CommType_UnMute:
 			{
-				PerformUnMute(param1, target);
+				PerformUnMute(target);
+				LogAction(param1, target, "\"%L\" unmuted \"%L\"", param1, target);
 				ShowActivity2(param1, "[SM] ", "%t", "Unmuted target", "_s", name);
 			}
 			case CommType_Gag:
 			{
-				PerformGag(param1, target);
+				PerformGag(target);
+				LogAction(param1, target, "\"%L\" gagged \"%L\"", param1, target);
 				ShowActivity2(param1, "[SM] ", "%t", "Gagged target", "_s", name);
 			}
 			case CommType_UnGag:
 			{
-				PerformUnGag(param1, target);
+				PerformUnGag(target);
+				LogAction(param1, target, "\"%L\" ungagged \"%L\"", param1, target);
 				ShowActivity2(param1, "[SM] ", "%t", "Ungagged target", "_s", name);
 			}
 			case CommType_Silence:
 			{
-				PerformSilence(param1, target);
+				PerformSilence(target);
+				LogAction(param1, target, "\"%L\" silenced \"%L\"", param1, target);
 				ShowActivity2(param1, "[SM] ", "%t", "Silenced target", "_s", name);
 			}
 			case CommType_UnSilence:
 			{
-				PerformUnSilence(param1, target);
+				PerformUnSilence(target);
+				LogAction(param1, target, "\"%L\" unsilenced \"%L\"", param1, target);
 				ShowActivity2(param1, "[SM] ", "%t", "Unsilenced target", "_s", name);
 			}
 		}
 	}
 }
 
-void PerformMute(int client, int target, bool silent=false)
+void PerformMute(int target)
 {
 	playerstate[target].isMuted = true;
 	SetClientListeningFlags(target, VOICE_MUTED);
-	
+
 	FireOnClientMute(target, true);
-	
-	if (!silent)
-	{
-		LogAction(client, target, "\"%L\" muted \"%L\"", client, target);
-	}
 }
 
-void PerformUnMute(int client, int target, bool silent=false)
+void PerformUnMute(int target)
 {
 	playerstate[target].isMuted = false;
 	if (g_Cvar_Deadtalk.IntValue == 1 && !IsPlayerAlive(target))
@@ -248,36 +249,21 @@ void PerformUnMute(int client, int target, bool silent=false)
 	}
 	
 	FireOnClientMute(target, false);
-	
-	if (!silent)
-	{
-		LogAction(client, target, "\"%L\" unmuted \"%L\"", client, target);
-	}
 }
 
-void PerformGag(int client, int target, bool silent=false)
+void PerformGag(int target)
 {
 	playerstate[target].isGagged = true;
 	FireOnClientGag(target, true);
-	
-	if (!silent)
-	{
-		LogAction(client, target, "\"%L\" gagged \"%L\"", client, target);
-	}
 }
 
-void PerformUnGag(int client, int target, bool silent=false)
+void PerformUnGag(int target)
 {
 	playerstate[target].isGagged = false;
 	FireOnClientGag(target, false);
-	
-	if (!silent)
-	{
-		LogAction(client, target, "\"%L\" ungagged \"%L\"", client, target);
-	}
 }
 
-void PerformSilence(int client, int target)
+void PerformSilence(int target)
 {
 	if (!playerstate[target].isGagged)
 	{
@@ -291,11 +277,9 @@ void PerformSilence(int client, int target)
 		SetClientListeningFlags(target, VOICE_MUTED);
 		FireOnClientMute(target, true);
 	}
-	
-	LogAction(client, target, "\"%L\" silenced \"%L\"", client, target);
 }
 
-void PerformUnSilence(int client, int target)
+void PerformUnSilence(int target)
 {
 	if (playerstate[target].isGagged)
 	{
@@ -321,8 +305,6 @@ void PerformUnSilence(int client, int target)
 		}
 		FireOnClientMute(target, false);
 	}
-	
-	LogAction(client, target, "\"%L\" unsilenced \"%L\"", client, target);
 }
 
 public Action Command_Mute(int client, int args)
@@ -358,16 +340,18 @@ public Action Command_Mute(int client, int args)
 	{
 		int target = target_list[i];
 		
-		PerformMute(client, target);
+		PerformMute(target);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Muted target", target_name);
+		LogAction(client, -1, "\"%L\" muted \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Muted target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" muted \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;	
@@ -406,16 +390,18 @@ public Action Command_Gag(int client, int args)
 	{
 		int target = target_list[i];
 		
-		PerformGag(client, target);
+		PerformGag(target);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Gagged target", target_name);
+		LogAction(client, -1, "\"%L\" gagged \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Gagged target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" gagged \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;	
@@ -454,16 +440,18 @@ public Action Command_Silence(int client, int args)
 	{
 		int target = target_list[i];
 		
-		PerformSilence(client, target);
+		PerformSilence(target);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Silenced target", target_name);
+		LogAction(client, -1, "\"%L\" silenced \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Silenced target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" silenced \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;	
@@ -507,8 +495,10 @@ public Action Command_Unmute(int client, int args)
 			continue;
 		}
 		
-		PerformUnMute(client, target);
+		PerformUnMute(target);
 	}
+	
+	LogAction(client, -1, "\"%L\" unmuted \"%s\"", client, target_name);
 	
 	if (tn_is_ml)
 	{
@@ -555,16 +545,18 @@ public Action Command_Ungag(int client, int args)
 	{
 		int target = target_list[i];
 		
-		PerformUnGag(client, target);
+		PerformUnGag(target);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Ungagged target", target_name);
+		LogAction(client, -1, "\"%L\" ungagged \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Ungagged target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" ungagged \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;	
@@ -603,16 +595,18 @@ public Action Command_Unsilence(int client, int args)
 	{
 		int target = target_list[i];
 		
-		PerformUnSilence(client, target);
+		PerformUnSilence(target);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Unsilenced target", target_name);
+		LogAction(client, -1, "\"%L\" unsilenced \"%s\"", client, target_name);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Unsilenced target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" unsilenced \"%L\"", client, target_list[0]);
 	}
 	
 	return Plugin_Handled;	

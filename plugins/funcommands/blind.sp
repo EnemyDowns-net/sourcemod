@@ -33,7 +33,7 @@
 
 int g_BlindTarget[MAXPLAYERS+1];
 
-void PerformBlind(int client, int target, int amount)
+void PerformBlind(int target, int amount)
 {
 	int targets[2];
 	targets[0] = target;
@@ -75,8 +75,6 @@ void PerformBlind(int client, int target, int amount)
 	}
 	
 	EndMessage();
-
-	LogAction(client, target, "\"%L\" set blind on \"%L\" (amount \"%d\")", client, target, amount);
 }
 
 public void AdminMenu_Blind(TopMenu topmenu, 
@@ -211,7 +209,8 @@ public int MenuHandler_Amount(Menu menu, MenuAction action, int param1, int para
 			char name[MAX_NAME_LENGTH];
 			GetClientName(target, name, sizeof(name));
 			
-			PerformBlind(param1, target, amount);
+			PerformBlind(target, amount);
+			LogAction(param1, target, "\"%L\" set blind on \"%L\", amount %d.", param1, target, amount);
 			ShowActivity2(param1, "[SM] ", "%t", "Set blind on target", "_s", name, amount);
 		}
 		
@@ -276,16 +275,18 @@ public Action Command_Blind(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		PerformBlind(client, target_list[i], amount);
+		PerformBlind(target_list[i], amount);
 	}
 	
 	if (tn_is_ml)
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Set blind on target", target_name);
+		LogAction(client, -1, "\"%L\" set blind on \"%s\", amount %d.", client, target_name, amount);
 	}
 	else
 	{
 		ShowActivity2(client, "[SM] ", "%t", "Set blind on target", "_s", target_name);
+		LogAction(client, target_list[0], "\"%L\" set blind on \"%L\", amount %d.", client, target_list[0], amount);
 	}
 	
 	return Plugin_Handled;
