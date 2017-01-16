@@ -85,6 +85,7 @@ for arch in SM.archs:
     'smn_halflife.cpp',
     'FrameIterator.cpp',
     'DatabaseConfBuilder.cpp',
+    'NativeInvoker.cpp',
   ]
 
   if arch == 'x64':

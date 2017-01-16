@@ -35,6 +35,8 @@
 #include <IForwardSys.h>
 #include <ISourceMod.h>
 #include <amtl/am-autoptr.h>
+#include "ShareSys.h"
+#include "NativeInvoker.h"
 
 HandleType_t g_GlobalFwdType = 0;
 HandleType_t g_PrivateFwdType = 0;
@@ -43,6 +45,7 @@ static bool s_CallStarted = false;
 static ICallable *s_pCallable = NULL;
 static IPluginFunction *s_pFunction = NULL;
 static IForward *s_pForward = NULL;
+static NativeInvoker *s_pInvoker = NULL;
 
 class ForwardNativeHelpers : 
 	public SMGlobalClass,
@@ -102,6 +105,9 @@ inline void ResetCall()
 	s_pFunction = NULL;
 	s_pForward = NULL;
 	s_pCallable = NULL;
+	if(s_pInvoker)
+		delete s_pInvoker;
+	s_pInvoker = NULL;
 }
 
 static cell_t sm_GetFunctionByName(IPluginContext *pContext, const cell_t *params)
@@ -360,6 +366,27 @@ static cell_t sm_CallStartForward(IPluginContext *pContext, const cell_t *params
 	s_pForward = pForward;
 
 	s_pCallable = static_cast<ICallable *>(pForward);
+
+	s_CallStarted = true;
+
+	return 1;
+}
+
+static cell_t sm_CallStartNative(IPluginContext *pContext, const cell_t *params)
+{
+	ResetCall();
+
+	char *name;
+	pContext->LocalToString(params[1], &name);
+
+	ke::RefPtr<Native> pNative = g_ShareSys.FindNative(name);
+
+	if (!pNative)
+		return 0;//pContext->ThrowNativeError("Invalid native \"%s\"", name);
+
+	s_pInvoker = new NativeInvoker(pContext, pNative);
+
+	s_pCallable = static_cast<ICallable *>(s_pInvoker);
 
 	s_CallStarted = true;
 
@@ -656,6 +683,39 @@ static cell_t sm_CallFinish(IPluginContext *pContext, const cell_t *params)
 		IForward *pForward = s_pForward;
 		ResetCall();
 		err = pForward->Execute(result, NULL);
+	} else if (s_pInvoker) {
+		err = s_pInvoker->Execute(result);
+		ResetCall();
+	}
+
+	return err;
+}
+
+static cell_t sm_CallFinishEx(IPluginContext *pContext, const cell_t *params)
+{
+	int err = SP_ERROR_NOT_RUNNABLE;
+	cell_t *result;
+
+	if (!s_CallStarted)
+	{
+		return pContext->ThrowNativeError("Cannot finish call when there is no call in progress");
+	}
+
+	pContext->LocalToPhysAddr(params[1], &result);
+
+	// Note: Execute() swallows exceptions, so this is okay.
+	if (s_pFunction)
+	{
+		IPluginFunction *pFunction = s_pFunction;
+		ResetCall();
+		err = pFunction->Execute(result, params[2], params[3]);
+	} else if (s_pForward) {
+		IForward *pForward = s_pForward;
+		ResetCall();
+		err = pForward->Execute(result, NULL);
+	} else if (s_pInvoker) {
+		err = s_pInvoker->Execute(result, params[2], params[3]);
+		ResetCall();
 	}
 
 	return err;
@@ -742,6 +802,7 @@ REGISTER_NATIVES(functionNatives)
 	{"RemoveAllFromForward",                sm_RemoveAllFromForward},
 	{"Call_StartFunction",                  sm_CallStartFunction},
 	{"Call_StartForward",                   sm_CallStartForward},
+	{"Call_StartNative",                    sm_CallStartNative},
 	{"Call_PushCell",                       sm_CallPushCell},
 	{"Call_PushCellRef",                    sm_CallPushCellRef},
 	{"Call_PushFloat",                      sm_CallPushFloat},
@@ -753,6 +814,7 @@ REGISTER_NATIVES(functionNatives)
 	{"Call_PushNullVector",                 sm_CallPushNullVector},
 	{"Call_PushNullString",                 sm_CallPushNullString},
 	{"Call_Finish",                         sm_CallFinish},
+	{"Call_FinishEx",                       sm_CallFinishEx},
 	{"Call_Cancel",                         sm_CallCancel},
 	{"RequestFrame",                        sm_AddFrameAction},
 
