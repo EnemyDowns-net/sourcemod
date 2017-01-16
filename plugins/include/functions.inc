@@ -294,6 +294,17 @@ native void Call_StartForward(Handle fwd);
 native void Call_StartFunction(Handle plugin, Function func);
 
 /**
+ * Starts a call to a native.
+ *
+ * @note Cannot be used during an incomplete call.
+ *
+ * @param name				Name of the native.
+ * @return					True on success, false otherwise.
+ * @error					Invalid function, or called before another call has completed.
+ */
+native bool Call_StartNative(const char[] name);
+
+/**
  * Pushes a cell onto the current call.
  *
  * @note Cannot be used before a call has been started.
@@ -415,6 +426,20 @@ native void Call_PushNullString();
  * @error               Called before a call has been started.
  */
 native int Call_Finish(any &result=0);
+
+/**
+ * Completes a call to a function or forward's call list.
+ * Catches exceptions thrown by the native.
+ *
+ * @note Cannot be used before a call has been started.
+ *
+ * @param result			Return value of function or forward's call list.
+ * @param exception			Buffer to store the exception in.
+ * @param maxlength			Maximum length of the buffer.
+ * @return					SP_ERROR_NONE on success, any other integer on failure.
+ * @error					Called before a call has been started.
+ */
+native int Call_FinishEx(any &result=0, char[] exception, int maxlength);
 
 /**
  * Cancels a call to a function or forward's call list.

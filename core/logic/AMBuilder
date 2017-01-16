@@ -84,6 +84,7 @@ for cxx in builder.targets:
     'smn_halflife.cpp',
     'FrameIterator.cpp',
     'DatabaseConfBuilder.cpp',
+    'NativeInvoker.cpp',
   ]
 
   if binary.compiler.target.arch == 'x86_64':
