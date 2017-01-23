@@ -73,7 +73,6 @@ struct Plugin
 #include <halflife>
 #include <adt>
 #include <banning>
-#include <commandfilters>
 #include <nextmap>
 #include <commandline>
 
@@ -766,6 +765,7 @@ methodmap FrameIterator < Handle {
 	public native void GetFilePath(char[] buffer, int maxlen);
 }
 
+#include <commandfilters>
 #include <helpers>
 #include <entity>
 #include <entity_prop_stocks>
