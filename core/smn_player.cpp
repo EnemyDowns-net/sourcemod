@@ -356,6 +356,27 @@ static cell_t GetAvgPackets(IPluginContext *pContext, const cell_t *params)
 	return sp_ftoc(value);
 }
 
+static cell_t sm_GetClientIClient(IPluginContext *pContext, const cell_t *params)
+{
+	int client = params[1];
+
+	CPlayer *pPlayer = g_Players.GetPlayerByIndex(client);
+	if (!pPlayer)
+	{
+		return pContext->ThrowNativeError("Client index %d is invalid", client);
+	}
+	else if (!pPlayer->IsConnected())
+	{
+		return pContext->ThrowNativeError("Client %d is not connected", client);
+	}
+	else if (pPlayer->IsFakeClient())
+	{
+		return pContext->ThrowNativeError("Client %d is a bot", client);
+	}
+
+	return (cell_t)pPlayer->GetIClient();
+}
+
 static cell_t RunAdminCacheChecks(IPluginContext *pContext, const cell_t *params)
 {
 	int client = params[1];
@@ -392,6 +413,7 @@ REGISTER_NATIVES(playernatives)
 	{"GetClientAvgChoke",		GetAvgChoke},
 	{"GetClientAvgData",		GetAvgData},
 	{"GetClientAvgPackets",		GetAvgPackets},
+	{"GetClientIClient",		sm_GetClientIClient },
 	{"RunAdminCacheChecks",		RunAdminCacheChecks},
 	{NULL,						NULL}
 };

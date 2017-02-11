@@ -742,6 +742,15 @@ native float GetClientAvgData(int client, NetFlow flow);
 native float GetClientAvgPackets(int client, NetFlow flow);
 
 /**
+ * Returns the client's baseserver IClient pointer.
+ *
+ * @param client		Player's index.
+ * @return				IClient address.
+ * @error				Invalid client index, client not connected, or fake client.
+ */
+native Address GetClientIClient(int client);
+
+/**
  * Translates an userid index to the real player index.
  *
  * @param userid        Userid value.
