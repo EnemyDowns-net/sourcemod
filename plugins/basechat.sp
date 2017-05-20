@@ -34,6 +34,7 @@
 #pragma semicolon 1
 
 #include <sourcemod>
+#include <basecomm>
 
 #pragma newdecls required
 
@@ -80,6 +81,9 @@ public void OnPluginStart()
 
 public Action OnClientSayCommand(int client, const char[] command, const char[] sArgs)
 {
+	if (client <= 0 || BaseComm_IsClientGagged(client))
+		return Plugin_Continue;
+
 	int startidx;
 	if (sArgs[startidx] != CHAT_SYMBOL)
 		return Plugin_Continue;
@@ -88,51 +92,20 @@ public Action OnClientSayCommand(int client, const char[] command, const char[] 
 	
 	if (strcmp(command, "say", false) == 0)
 	{
-		if (sArgs[startidx] != CHAT_SYMBOL) // sm_say alias
-		{
-			if (!CheckCommandAccess(client, "sm_say", ADMFLAG_CHAT))
-			{
-				return Plugin_Continue;
-			}
-			
-			SendChatToAll(client, sArgs[startidx]);
-			LogAction(client, -1, "\"%L\" triggered sm_say (text %s)", client, sArgs[startidx]);
-			
-			return Plugin_Stop;
-		}
-		
-		startidx++;
-
-		if (sArgs[startidx] != CHAT_SYMBOL) // sm_psay alias
-		{
-			if (!CheckCommandAccess(client, "sm_psay", ADMFLAG_CHAT))
-			{
-				return Plugin_Continue;
-			}
-			
-			char arg[64];
-			
-			int len = BreakString(sArgs[startidx], arg, sizeof(arg));
-			int target = FindTarget(client, arg, true, false);
-			
-			if (target == -1 || len == -1)
-				return Plugin_Stop;
-			
-			SendPrivateChat(client, target, sArgs[startidx+len]);
-			
-			return Plugin_Stop;
-		}
-		
-		startidx++;
-		
-		// sm_csay alias
-		if (!CheckCommandAccess(client, "sm_csay", ADMFLAG_CHAT))
+		if (!CheckCommandAccess(client, "sm_psay_chat", ADMFLAG_CHAT))
 		{
 			return Plugin_Continue;
 		}
 		
-		DisplayCenterTextToAll(client, sArgs[startidx]);
-		LogAction(client, -1, "\"%L\" triggered sm_csay (text %s)", client, sArgs[startidx]);
+		char arg[64];
+		
+		int len = BreakString(sArgs[startidx], arg, sizeof(arg));
+		int target = FindTarget(client, arg, true, false);
+		
+		if (target == -1 || len == -1)
+			return Plugin_Stop;
+		
+		SendPrivateChat(client, target, sArgs[startidx+len]);
 		
 		return Plugin_Stop;
 	}
