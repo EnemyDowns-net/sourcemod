@@ -417,12 +417,13 @@ native void SDKUnhook(int entity, SDKHookType type, SDKHookCB callback);
  * @param damageForce    Velocity of damage force
  * @param damagePosition Origin of damage
  * @param bypassHooks    If true, bypass SDK hooks on OnTakeDamage
+ * @param damageCustom   Custom damage taken
  * @error                Invalid entity, attacker, inflictor, or weapon entity.
  */
 native void SDKHooks_TakeDamage(int entity, int inflictor, int attacker,
 		float damage, int damageType=DMG_GENERIC, int weapon=-1,
 		const float damageForce[3]=NULL_VECTOR, const float damagePosition[3]=NULL_VECTOR,
-		bool bypassHooks = true);
+		bool bypassHooks = true, int damageCustom=0);
 
 /**
  * Forces a client to drop the specified weapon
