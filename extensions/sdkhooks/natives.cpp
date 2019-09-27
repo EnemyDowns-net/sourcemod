@@ -175,7 +175,13 @@ cell_t Native_TakeDamage(IPluginContext *pContext, const cell_t *params)
 		 vecDamagePosition = vec3_origin;
 	}
 
-	CTakeDamageInfoHack info(pInflictor, pAttacker, flDamage, iDamageType, pWeapon, vecDamageForce, vecDamagePosition);
+	int iDamageCustom = 0;
+	if (params[0] >= 9)
+	{
+		iDamageCustom = params[9];
+	}
+
+	CTakeDamageInfoHack info(pInflictor, pAttacker, flDamage, iDamageType, pWeapon, vecDamageForce, vecDamagePosition, iDamageCustom);
 	SH_MCALL(pVictim, OnTakeDamage)((CTakeDamageInfoHack &)info);
 #endif
 

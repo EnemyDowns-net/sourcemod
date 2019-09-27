@@ -34,7 +34,7 @@
 
 CTakeDamageInfo::CTakeDamageInfo(){}
 
-CTakeDamageInfoHack::CTakeDamageInfoHack( CBaseEntity *pInflictor, CBaseEntity *pAttacker, float flDamage, int bitsDamageType, CBaseEntity *pWeapon, Vector vecDamageForce, Vector vecDamagePosition )
+CTakeDamageInfoHack::CTakeDamageInfoHack( CBaseEntity *pInflictor, CBaseEntity *pAttacker, float flDamage, int bitsDamageType, CBaseEntity *pWeapon, Vector vecDamageForce, Vector vecDamagePosition, int iDamageCustom )
 {
 	m_hInflictor = pInflictor;
 	if ( pAttacker )
@@ -63,9 +63,9 @@ CTakeDamageInfoHack::CTakeDamageInfoHack( CBaseEntity *pInflictor, CBaseEntity *
 	m_iAmmoType = -1;
 
 #if SOURCE_ENGINE < SE_ORANGEBOX
-	m_iCustomKillType = 0;
+	m_iCustomKillType = iDamageCustom;
 #else
-	m_iDamageCustom = 0;
+	m_iDamageCustom = iDamageCustom;
 #endif
 
 #if SOURCE_ENGINE == SE_CSS || SOURCE_ENGINE == SE_HL2DM || SOURCE_ENGINE == SE_DODS || SOURCE_ENGINE == SE_SDK2013 \
