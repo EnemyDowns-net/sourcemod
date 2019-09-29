@@ -159,7 +159,8 @@ private:
 
 class PlayerManager : 
 	public SMGlobalClass,
-	public IPlayerManager
+	public IPlayerManager,
+	public IGameEventListener2
 {
 	friend class CPlayer;
 public:
@@ -202,6 +203,7 @@ public: //IPlayerManager
 	IGamePlayer *GetGamePlayer(edict_t *pEdict);
 	int GetMaxClients();
 	int GetNumPlayers();
+	int GetNumClients();
 	int GetClientOfUserId(int userid);
 	bool IsServerActivated();
 	int FilterCommandTarget(IGamePlayer *pAdmin, IGamePlayer *pTarget, int flags);
@@ -212,6 +214,11 @@ public: //IPlayerManager
 	int GetClientFromSerial(unsigned int serial);
 	void ClearAdminId(AdminId id);
 	void RecheckAnyAdmins();
+public: // IGameEventListener2
+	void FireGameEvent(IGameEvent *pEvent);
+#if SOURCE_ENGINE >= SE_ALIENSWARM
+	virtual int	 GetEventDebugID( void ) { return 42; }
+#endif
 public:
 	inline int MaxClients()
 	{
@@ -272,6 +279,7 @@ private:
 	int m_SourceTVUserId;
 	int m_ReplayUserId;
 	bool m_bInCCKVHook;
+	int m_ClientCount;
 private:
 	static const int NETMSG_TYPE_BITS = 5; // SVC_Print overhead for netmsg type
 	static const int SVC_Print_BufferSize = 2048 - 1; // -1 for terminating \0

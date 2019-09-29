@@ -270,18 +270,7 @@ static cell_t sm_GetClientCount(IPluginContext *pCtx, const cell_t *params)
 		return playerhelpers->GetNumPlayers();
 	}
 
-	int maxplayers = playerhelpers->GetMaxClients();
-	int count = 0;
-	for (int i = 1; i <= maxplayers; ++i)
-	{
-		IGamePlayer *pPlayer = playerhelpers->GetGamePlayer(i);
-		if ((pPlayer->IsConnected()) && !(pPlayer->IsInGame()))
-		{
-			count++;
-		}
-	}
-
-	return (playerhelpers->GetNumPlayers() + count);
+	return playerhelpers->GetNumClients();
 }
 
 static cell_t sm_GetMaxClients(IPluginContext *pCtx, const cell_t *params)

@@ -41,7 +41,7 @@
 #include <IAdminSystem.h>
 
 #define SMINTERFACE_PLAYERMANAGER_NAME		"IPlayerManager"
-#define SMINTERFACE_PLAYERMANAGER_VERSION	21
+#define SMINTERFACE_PLAYERMANAGER_VERSION	22
 
 struct edict_t;
 class IPlayerInfo;
@@ -543,9 +543,16 @@ namespace SourceMod
 		/**
 		 * @brief Returns the number of players currently connected.
 		 *
-		 * @return				Current number of connected clients.
+		 * @return				Current number of connected players.
 		 */
 		virtual int GetNumPlayers() =0;
+
+		/**
+		 * @brief Returns the number of clients currently connected.
+		 *
+		 * @return				Current number of connected clients.
+		 */
+		virtual int GetNumClients() =0;
 
 		/**
 		 * @brief Returns the client index by its userid.
