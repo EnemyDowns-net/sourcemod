@@ -213,6 +213,9 @@ void PlayerManager::OnSourceModAllInitialized()
 		SH_ADD_HOOK(ConCommand, Dispatch, pCmd, SH_STATIC(CmdMaxplayersCallback), true);
 		maxplayersCmd = pCmd;
 	}
+
+	gameevents->AddListener(this, "player_connect", true);
+	gameevents->AddListener(this, "player_disconnect", true);
 }
 
 void PlayerManager::OnSourceModShutdown()
@@ -261,6 +264,8 @@ void PlayerManager::OnSourceModShutdown()
 	{
 		SH_REMOVE_HOOK(ConCommand, Dispatch, maxplayersCmd, SH_STATIC(CmdMaxplayersCallback), true);
 	}
+
+	gameevents->RemoveListener(this);
 }
 
 ConfigResult PlayerManager::OnSourceModConfigChanged(const char *key, 
@@ -1445,6 +1450,11 @@ int PlayerManager::GetNumPlayers()
 	return m_PlayerCount;
 }
 
+int PlayerManager::GetNumClients()
+{
+	return m_ClientCount;
+}
+
 int PlayerManager::GetClientOfUserId(int userid)
 {
 	if (userid < 0 || userid > USHRT_MAX)
@@ -2044,6 +2054,27 @@ bool PlayerManager::HandleConVarQuery(QueryCvarCookie_t cookie, int client, EQue
 	return false;
 }
 #endif
+
+/* IGameEventListener2::FireGameEvent */
+void PlayerManager::FireGameEvent(IGameEvent *pEvent)
+{
+	const char *name = pEvent->GetName();
+
+	if (strcmp(name, "player_connect") == 0)
+	{
+		const int client = pEvent->GetInt("index") + 1;
+		const int userid = pEvent->GetInt("userid");
+
+		m_ClientCount++;
+	}
+	else if (strcmp(name, "player_disconnect") == 0)
+	{
+		const int userid = pEvent->GetInt("userid");
+		const int client = m_UserIdLookUp[userid];
+
+		m_ClientCount--;
+	}
+}
 
 
 /*******************
