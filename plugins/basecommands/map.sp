@@ -45,6 +45,11 @@ public int MenuHandler_ChangeMap(Menu menu, MenuAction action, int param1, int p
 		char map[PLATFORM_MAX_PATH];
 		
 		menu.GetItem(param2, map, sizeof(map));
+
+		if (!map[0])
+		{
+			GetCurrentMap(map, sizeof(map));
+		}
 	
 		ShowActivity2(param1, "[SM] ", "%t", "Changing map", map);
 
@@ -156,6 +161,8 @@ int LoadMapList(Menu menu)
 	
 	char map_name[PLATFORM_MAX_PATH];
 	int map_count = GetArraySize(g_map_array);
+
+	menu.AddItem("", "Restart Current Map");
 	
 	for (int i = 0; i < map_count; i++)
 	{
