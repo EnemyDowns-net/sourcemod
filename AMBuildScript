@@ -371,7 +371,15 @@ class SMConfig(object):
       if self.enable_asan:
         cxx.cflags += ['-O1']
       else:
-        cxx.cflags += ['-O3']
+        cxx.cflags += [
+            '-O3',
+            '-fexperimental-new-pass-manager',
+            '-mllvm',
+            '-inline-threshold=1000',
+            '-mllvm',
+            '-vectorize-loops',
+            '-ftree-vectorize',
+      ]
 
     # Don't omit the frame pointer.
     cxx.cflags += ['-fno-omit-frame-pointer']
