@@ -4,4 +4,4 @@
 	shallow = true
 [submodule "sourcepawn"]
 	path = sourcepawn
-	url = https://github.com/BotoX/sourcepawn.git
+	url = https://gitlab.com/counterstrikesource/sourcepawn.git
