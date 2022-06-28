@@ -1,0 +1,60 @@
+# Full example of file upload as an asset
+# https://gitlab.com/gitlab-org/release-cli/-/tree/master/docs/examples/release-assets-as-generic-package
+
+stages:
+  - build
+  - upload
+  - release
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+  # Package version can only contain numbers (0-9), and dots (.).
+  # Must be in the format of X.Y.Z, i.e. should match /\A\d+\.\d+\.\d+\z/ regular expresion.
+  # See https://docs.gitlab.com/ee/user/packages/generic_packages/#publish-a-package-file
+  PACKAGE_PROJECT_ROOT_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}"
+  PACKAGE_REGISTRY_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/${CI_PROJECT_NAME}"
+  PACKAGE_OS: "linux"
+  PACKAGE_FILENAME: "${CI_PROJECT_NAME}-${PACKAGE_OS}-${CI_COMMIT_TAG}"
+
+build:
+  stage: build
+  image: docker:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
+    - docker push "$CI_REGISTRY_IMAGE"
+    - docker run -d --name build -ti --entrypoint /bin/bash "$CI_REGISTRY_IMAGE"
+    - docker cp build:/home/alliedmodders/sourcemod/build/package/ ./output
+  artifacts:
+    paths:
+      - output
+
+upload:
+  stage: upload
+  image: alpine:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - apk add curl zip jq
+    - cd output && zip -r ../"${PACKAGE_FILENAME}.zip" . * && cd -
+    # - |
+    #   curl -s --header "JOB-TOKEN: ${CI_JOB_TOKEN}" ${PACKAGE_PROJECT_ROOT_URL}/packages | jq -r '[.[]|select(.version=="${CI_COMMIT_TAG}")][0]["_links"]["delete_api_path"]' > delete_url.txt
+    # - 'cat delete_url.txt | grep -q https && curl -s -X DELETE --header "JOB-TOKEN: ${CI_JOB_TOKEN}" $(cat delete_url.txt); echo "Done"'
+    - 'curl --header "JOB-TOKEN: ${CI_JOB_TOKEN}" --upload-file ${PACKAGE_FILENAME}.zip ${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${PACKAGE_FILENAME}.zip'
+
+release:
+  # Caution, as of 2021-02-02 these assets links require a login, see:
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/299384
+  stage: release
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  rules:
+    - if: $CI_COMMIT_TAG
+  script:
+    - |
+      release-cli create --name "Release $CI_COMMIT_TAG" --tag-name $CI_COMMIT_TAG \
+        --assets-link "{\"name\":\"${PACKAGE_FILENAME}.zip\",\"url\":\"${PACKAGE_REGISTRY_URL}/${CI_COMMIT_TAG}/${PACKAGE_FILENAME}.zip\"}"
