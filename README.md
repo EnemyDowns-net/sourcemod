@@ -1,6 +1,8 @@
 SourceMod
 =========
 
+Fork from here: https://gitlab.com/counterstrikesource/sourcemod
+
 General
 -------
 - [SourceMod website](http://www.sourcemod.net): Source Engine scripting and server administration
